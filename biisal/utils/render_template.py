@@ -8,6 +8,7 @@ import aiofiles
 import logging
 import aiohttp
 import jinja2
+from utils_bot import replace_username
 
 async def render_page(id, secure_hash, src=None):
     file = await StreamBot.get_messages(int(Var.BIN_CHANNEL), int(id))
@@ -38,7 +39,7 @@ async def render_page(id, secure_hash, src=None):
     file_name = file_data.file_name.replace("_", " ")
 
     return template.render(
-        file_name=file_name,
+        filename=replace_username(file_name),
         file_url=src,
         file_size=file_size,
         file_unique_id=file_data.unique_id,
