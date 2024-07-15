@@ -39,7 +39,7 @@ async def render_page(id, secure_hash, src=None):
     file_name = file_data.file_name.replace("_", " ")
 
     return template.render(
-        filename=replace_username(file_name),
+        file_name=replace_username(file_name),
         file_url=src,
         file_size=file_size,
         file_unique_id=file_data.unique_id,
