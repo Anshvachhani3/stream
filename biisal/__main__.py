@@ -1,5 +1,5 @@
 # (c) @biisal
-# (c) adarsh-goel
+# (c) adars h-goel
 import os
 import sys
 import glob
@@ -14,11 +14,6 @@ from aiohttp import web
 from .server import web_server
 from .utils.keepalive import ping_server
 from biisal.bot.clients import initialize_clients
-from pyrogram import types
-from pyrogram import utils as pyroutils
-
-pyroutils.MIN_CHAT_ID = -999999999999
-pyroutils.MIN_CHANNEL_ID = -100999999999999
 
 LOGO = """
  ____ ___ ___ ____    _    _     
@@ -38,6 +33,8 @@ logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 ppath = "biisal/bot/plugins/*.py"
 files = glob.glob(ppath)
 StreamBot.start()
+loop = asyncio.get_event_loop()
+
 
 async def start_services():
     print('\n')
@@ -64,12 +61,10 @@ async def start_services():
             spec.loader.exec_module(load)
             sys.modules["biisal.bot.plugins." + plugin_name] = load
             print("Imported => " + plugin_name)
-    
     if Var.ON_HEROKU:
         print("------------------ Starting Keep Alive Service ------------------")
         print()
         asyncio.create_task(ping_server())
-    
     print('-------------------- Initalizing Web Server -------------------------')
     app = web.AppRunner(await web_server())
     await app.setup()
@@ -77,27 +72,27 @@ async def start_services():
     await web.TCPSite(app, bind_address, Var.PORT).start()
     print('----------------------------- DONE ---------------------------------------------------------------------')
     print('\n')
+    print('---------------------------------------------------------------------------------------------------------')
+    print('---------------------------------------------------------------------------------------------------------')
+    print(' follow me for more such exciting bots! https://github.com/biisal')
+    print('---------------------------------------------------------------------------------------------------------')
+    print('\n')
     print('----------------------- Service Started -----------------------------------------------------------------')
-    print(f"Bot => {StreamBot.username}")
-    print(f"Server running on => {bind_address}:{Var.PORT}")
-    print(f"Owner => {Var.OWNER_USERNAME}")
-    
+    print('                        bot =>> {}'.format((await StreamBot.get_me()).first_name))
+    print('                        server ip =>> {}:{}'.format(bind_address, Var.PORT))
+    print('                        Owner =>> {}'.format((Var.OWNER_USERNAME)))
     if Var.ON_HEROKU:
-        print(f"App running on => {Var.FQDN}")
-    
+        print('                        app runnng on =>> {}'.format(Var.FQDN))
     print('---------------------------------------------------------------------------------------------------------')
     print(LOGO)
-    
-    try:
-        await StreamBot.send_message(chat_id=Var.OWNER_ID[0], text='<b>Bot restarted successfully!</b>')
+    try: 
+        await StreamBot.send_message(chat_id=Var.OWNER_ID[0] ,text='<b>ᴊᴀɪ sʜʀᴇᴇ ᴋʀɪsʜɴᴀ 😎\nʙᴏᴛ ʀᴇsᴛᴀʀᴛᴇᴅ !!</b>')
     except Exception as e:
-        print(f'Error sending restart message: {e}')
-    
+        print(f'got this err to send restart msg to owner : {e}')
     await idle()
 
 if __name__ == '__main__':
     try:
-        # Using asyncio.run() for better event loop handling
-        asyncio.run(start_services())
+        loop.run_until_complete(start_services())
     except KeyboardInterrupt:
         logging.info('----------------------- Service Stopped -----------------------')
