@@ -14,6 +14,11 @@ from aiohttp import web
 from .server import web_server
 from .utils.keepalive import ping_server
 from biisal.bot.clients import initialize_clients
+from pyrogram import types
+from pyrogram import utils as pyroutils
+
+pyroutils.MIN_CHAT_ID = -999999999999
+pyroutils.MIN_CHANNEL_ID = -100999999999999
 
 LOGO = """
  ____ ___ ___ ____    _    _     
