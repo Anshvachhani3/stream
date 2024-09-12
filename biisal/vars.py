@@ -31,7 +31,7 @@ class Var(object):
     else:
         ON_HEROKU = False
 
-    FQDN = str(getenv('FQDN', 'http://vps.hostingup.icu:9097')) if not ON_HEROKU or getenv('FQDN', '') else APP_NAME + '.herokuapp.com'
+    FQDN = str(getenv('FQDN', 'vps.hostingup.icu:9097')) if not ON_HEROKU or getenv('FQDN', '') else APP_NAME + '.herokuapp.com'
     HAS_SSL = bool(getenv('HAS_SSL', True))
     
     if HAS_SSL:
