@@ -62,6 +62,67 @@ async def stream_handler(request: web.Request):
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
 
+@routes.get(r"/d/{path:\S+}", allow_head=True)
+async def dwn_handler(request: web.Request):
+    try:
+        # Extract the path and determine the ID and hash
+        path = request.match_info["path"]
+        match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)$", path)
+        if match:
+            secure_hash = match.group(1)
+            id = int(match.group(2))
+        else:
+            id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
+            secure_hash = request.rel_url.query.get("hash")
+
+        # Step 1: Serve an HTML page with a "Preparing download..." message
+        # Set up the download URL for redirection
+        download_url = request.url
+
+        html_content = f'''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Preparing Download</title>
+            <style>
+                #message {{
+                    font-size: 18px;
+                    text-align: center;
+                    margin-top: 20%;
+                }}
+            </style>
+        </head>
+        <body>
+
+            <div id="message">Preparing your download... Please wait 2 seconds.</div>
+
+            <script>
+                const downloadUrl = "{download_url}"; // Use the same URL for the download
+                function triggerDownload() {{
+                    document.getElementById('message').innerText = "Starting download...";
+                    window.location.href = downloadUrl;
+                }}
+                setTimeout(triggerDownload, 2000); // Delay of 2 seconds
+            </script>
+
+        </body>
+        </html>
+        '''
+        return web.Response(text=html_content, content_type="text/html")
+
+    except InvalidHash as e:
+        raise web.HTTPForbidden(text=e.message)
+    except FIleNotFound as e:
+        raise web.HTTPNotFound(text=e.message)
+    except (AttributeError, BadStatusLine, ConnectionResetError):
+        pass
+    except Exception as e:
+        logging.critical(e.with_traceback(None))
+        raise web.HTTPInternalServerError(text=str(e))
+
+
 @routes.get(r"/{path:\S+}", allow_head=True)
 async def stream_handler(request: web.Request):
     try:
