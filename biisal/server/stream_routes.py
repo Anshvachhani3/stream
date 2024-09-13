@@ -74,9 +74,9 @@ async def dwn_handler(request: web.Request):
         else:
             id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
             secure_hash = request.rel_url.query.get("hash")
-
-        # Prepare the actual download URL (removing the /d/ prefix)
-        actual_download_url = f"/{path}"
+        
+        # Prepare the actual download URL with hash parameter
+        actual_download_url = f"/{path}?hash={secure_hash}" if secure_hash else f"/{path}"
 
         # Generate HTML content for the preparation page
         html_content = f'''
@@ -122,16 +122,6 @@ async def dwn_handler(request: web.Request):
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
 
-
-    except InvalidHash as e:
-        raise web.HTTPForbidden(text=e.message)
-    except FIleNotFound as e:
-        raise web.HTTPNotFound(text=e.message)
-    except (AttributeError, BadStatusLine, ConnectionResetError):
-        pass
-    except Exception as e:
-        logging.critical(e.with_traceback(None))
-        raise web.HTTPInternalServerError(text=str(e))
 
 
 @routes.get(r"/{path:\S+}", allow_head=True)
