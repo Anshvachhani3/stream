@@ -75,10 +75,10 @@ async def dwn_handler(request: web.Request):
             id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
             secure_hash = request.rel_url.query.get("hash")
 
-        # Step 1: Serve an HTML page with a "Preparing download..." message
-        # Set up the download URL for redirection
-        download_url = request.url
+        # Prepare the actual download URL (removing the /d/ prefix)
+        actual_download_url = f"/{path}"
 
+        # Generate HTML content for the preparation page
         html_content = f'''
         <!DOCTYPE html>
         <html lang="en">
@@ -95,22 +95,33 @@ async def dwn_handler(request: web.Request):
             </style>
         </head>
         <body>
-
             <div id="message">Preparing your download... Please wait 2 seconds.</div>
-
             <script>
-                const downloadUrl = "{download_url}"; // Use the same URL for the download
-                function triggerDownload() {{
+                // Function to redirect to the actual download URL
+                function redirectToDownload() {{
+                    // Update message
                     document.getElementById('message').innerText = "Starting download...";
-                    window.location.href = downloadUrl;
+                    // Redirect to the actual download URL
+                    window.location.href = "{actual_download_url}";
                 }}
-                setTimeout(triggerDownload, 2000); // Delay of 2 seconds
+                // Redirect after 2 seconds
+                setTimeout(redirectToDownload, 2000);
             </script>
-
         </body>
         </html>
         '''
         return web.Response(text=html_content, content_type="text/html")
+
+    except InvalidHash as e:
+        raise web.HTTPForbidden(text=e.message)
+    except FIleNotFound as e:
+        raise web.HTTPNotFound(text=e.message)
+    except (AttributeError, BadStatusLine, ConnectionResetError):
+        pass
+    except Exception as e:
+        logging.critical(e.with_traceback(None))
+        raise web.HTTPInternalServerError(text=str(e))
+
 
     except InvalidHash as e:
         raise web.HTTPForbidden(text=e.message)
